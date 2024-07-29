@@ -13,21 +13,43 @@
             margin: 0;
             background-color: #f0f0f0;
             text-align: center;
+            overflow: hidden;
+        }
+        #container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
         }
         #video {
             width: 100%;
-            max-width: 600px;
             border: 1px solid #ddd;
             background: #000;
+        }
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            height: 80%;
+            max-height: 400px;
+            border: 2px solid #00ff00; /* Çerçeve rengi */
+            box-sizing: border-box;
+            pointer-events: none;
         }
         #result {
             margin-top: 20px;
             font-size: 1.2em;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <video id="video" autoplay></video>
+    <div id="container">
+        <video id="video" autoplay></video>
+        <div id="overlay"></div>
+    </div>
     <div id="result">QR kodu taramak için kamerayı ekrana yönlendirin.</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
@@ -39,7 +61,9 @@
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true); // iOS için gerekli
                 video.play();
-                scanQRCode();
+                video.onloadedmetadata = () => {
+                    scanQRCode();
+                };
             } catch (err) {
                 console.error('Kamera açılırken bir hata oluştu: ', err);
                 document.getElementById('result').textContent = 'Kamera açılırken bir hata oluştu.';
@@ -53,11 +77,23 @@
 
             function detectQRCode() {
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.height = video.videoHeight;
+                    const overlay = document.getElementById('overlay');
                     canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: "dontInvert" });
+                    
+                    // Çerçevenin içine yalnızca bu alandaki QR kodunu tarayın
+                    const overlayRect = overlay.getBoundingClientRect();
+                    const videoRect = video.getBoundingClientRect();
+                    const scaleX = canvas.width / videoRect.width;
+                    const scaleY = canvas.height / videoRect.height;
+                    const left = (overlayRect.left - videoRect.left) * scaleX;
+                    const top = (overlayRect.top - videoRect.top) * scaleY;
+                    const width = overlayRect.width * scaleX;
+                    const height = overlayRect.height * scaleY;
+
+                    const imageData = context.getImageData(left, top, width, height);
+                    const code = jsQR(imageData.data, width, height, { inversionAttempts: "dontInvert" });
 
                     if (code) {
                         document.getElementById('result').textContent = `QR Kodu İçeriği: ${code.data}`;
