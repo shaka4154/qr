@@ -35,7 +35,7 @@
         const codeReader = new ZXing.BrowserQRCodeReader();
         const video = document.getElementById('video');
         const resultElement = document.getElementById('result');
-        
+
         async function startScanner() {
             try {
                 const devices = await codeReader.listVideoInputDevices();
@@ -43,10 +43,17 @@
                     resultElement.textContent = 'Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.';
                     return;
                 }
-                const firstDeviceId = devices[0].deviceId;
-                await codeReader.decodeFromVideoDevice(firstDeviceId, video, (result, error) => {
+
+                // Arka kamerayı seçme
+                const backCamera = devices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')) || devices[0];
+                const deviceId = backCamera.deviceId;
+
+                // QR kod tarayıcıyı başlat
+                codeReader.decodeFromVideoDevice(deviceId, video, (result, error) => {
                     if (result) {
+                        // QR kod okundu, kamerayı kapat ve sonucu göster
                         resultElement.textContent = `QR Kodu İçeriği: ${result.text}`;
+                        stopScanner();
                     }
                     if (error) {
                         console.error(error);
@@ -55,6 +62,16 @@
             } catch (err) {
                 console.error(err);
                 resultElement.textContent = 'Bir hata oluştu. Lütfen tarayıcınızı ve kamera izinlerinizi kontrol edin.';
+            }
+        }
+
+        function stopScanner() {
+            // Video akışını durdur
+            const stream = video.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
             }
         }
 
