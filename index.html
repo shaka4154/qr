@@ -20,7 +20,7 @@
         }
         .header {
             position: absolute;
-            top: 100px; /* Logoyu daha aşağıya getirir */
+            top: 235px; /* Logoyu yukarıya getirdik */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -33,7 +33,7 @@
             cursor: pointer;
         }
         .title {
-            margin: 150px 0 20px 0; /* Başlık ile logo arasındaki mesafeyi arttırır */
+            margin: 100px 0 20px 0; /* Başlık ile logo arasındaki mesafeyi arttırır */
             font-size: 2em;
             color: #1C3A57;
             text-transform: uppercase;
@@ -95,7 +95,36 @@
         .result a:hover {
             text-decoration: underline;
         }
-
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 1.2em;
+            color: #1C3A57;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .back-button:hover {
+            color: #007bff;
+        }
+        .new-scan-button {
+            display: none;
+            background-color: #1C3A57;
+            color: white;
+            padding: 1em 2em;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .new-scan-button:hover {
+            background-color: #285480;
+        }
         @media (max-width: 600px) {
             .title {
                 font-size: 1.5em;
@@ -119,6 +148,7 @@
     </style>
 </head>
 <body>
+    <a href="index.html" class="back-button">Anamenüye Dön</a>
     <div class="header" id="logoContainer">
         <a href="https://www.youtube.com/@GENCKALFA" target="_blank">
             <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo">
@@ -129,6 +159,7 @@
         <button class="button" id="startButton">Hemen Tara</button>
         <video id="video" autoplay></video>
         <div class="result" id="result"></div>
+        <button class="new-scan-button" id="newScanButton">Yeni Tarama Yap</button>
     </div>
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
@@ -136,7 +167,9 @@
         const startButton = document.getElementById('startButton');
         const video = document.getElementById('video');
         const result = document.getElementById('result');
+        const newScanButton = document.getElementById('newScanButton');
         const logoContainer = document.getElementById('logoContainer');
+        const backButton = document.querySelector('.back-button');
         let selectedDeviceId;
 
         const codeReader = new ZXing.BrowserQRCodeReader();
@@ -144,6 +177,7 @@
         startButton.addEventListener('click', () => {
             startButton.style.display = 'none'; // Butonu gizle
             logoContainer.style.display = 'none'; // Logoyu gizle
+            backButton.style.display = 'none'; // 'Anamenüye Dön' butonunu gizle
             codeReader.listVideoInputDevices().then(devices => {
                 const rearCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
                 selectedDeviceId = rearCamera.deviceId;
@@ -153,6 +187,8 @@
                 codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
                     if (result) {
                         video.style.display = 'none'; // Kamerayı gizle
+                        result.style.display = 'block'; // Sonuç kutusunu göster
+                        newScanButton.style.display = 'block'; // Yeni tarama butonunu göster
                         showResult(result.text);
                     } else if (error) {
                         console.error(error);
@@ -161,8 +197,14 @@
             }).catch(err => console.error(err));
         });
 
+        newScanButton.addEventListener('click', () => {
+            result.style.display = 'none'; // Sonuç kutusunu gizle
+            newScanButton.style.display = 'none'; // Yeni tarama butonunu gizle
+            logoContainer.style.display = 'flex'; // Logoyu tekrar göster
+            startButton.style.display = 'block'; // Başla butonunu tekrar göster
+        });
+
         function showResult(text) {
-            result.style.display = 'block'; // Sonuç kutusunu göster
             if (text.startsWith('http')) {
                 result.innerHTML = `Kod içeriği: <a href="${text}" target="_blank">${text}</a>`;
             } else {
