@@ -87,6 +87,7 @@
             margin-bottom: 20px;
         }
         .result {
+            display: none; /* İlk açılışta gizle */
             margin-top: 20px;
             width: 100%; /* Ekran genişliğine göre ayarlama */
             max-width: 500px; /* Maksimum genişlik */
@@ -174,6 +175,7 @@
         });
 
         function showResult(text) {
+            result.style.display = 'block'; // Sonuç kutusunu göster
             if (text.startsWith('http')) {
                 result.innerHTML = `Kod içeriği: <a href="${text}" target="_blank">${text}</a>`;
             } else {
