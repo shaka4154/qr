@@ -20,33 +20,20 @@
         }
         .header {
             position: absolute;
-            top: 10px;
+            top: 20px; /* Logoyu biraz aşağıya getir */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
         }
         .header img {
             width: 150px;
             height: auto;
             cursor: pointer;
         }
-        .header .back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 1.2em;
-            color: #1C3A57;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        .header .back-button:hover {
-            color: #007bff;
-        }
         .title {
-            margin: 80px 0 20px 0; /* Üst ve alt boşluklar */
+            margin: 80px 0 20px 0;
             font-size: 2em;
             color: #1C3A57;
             text-transform: uppercase;
@@ -80,17 +67,17 @@
         video {
             border: 5px solid #1C3A57;
             border-radius: 10px;
-            width: 100%; /* Kamera ekranını tam genişlikte yap */
+            width: 100%;
             height: auto;
-            max-width: 500px; /* Maksimum genişlik */
+            max-width: 500px;
             display: none;
             margin-bottom: 20px;
         }
         .result {
-            display: none; /* İlk açılışta gizle */
+            display: none;
             margin-top: 20px;
-            width: 100%; /* Ekran genişliğine göre ayarlama */
-            max-width: 500px; /* Maksimum genişlik */
+            width: 100%;
+            max-width: 500px;
             background: #f0f0f0;
             border: 2px solid #1C3A57;
             border-radius: 10px;
@@ -109,7 +96,6 @@
             text-decoration: underline;
         }
 
-        /* Mobil uyumlu stil */
         @media (max-width: 600px) {
             .title {
                 font-size: 1.5em;
@@ -134,7 +120,6 @@
 </head>
 <body>
     <div class="header">
-        <button class="back-button" onclick="window.location.href='index.html'">Anamenüye Dön</button>
         <a href="https://www.youtube.com/@GENCKALFA" target="_blank">
             <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo">
         </a>
