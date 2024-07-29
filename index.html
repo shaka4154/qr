@@ -4,122 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Kod Okuyucu</title>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
         body {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-        }
-        .container {
             text-align: center;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        #reader {
+        #video {
             width: 100%;
-            max-width: 500px;
-            height: 400px;
-            margin-bottom: 20px;
+            max-width: 600px;
+            border: 1px solid #ddd;
+            background: #000;
         }
-        .result {
-            font-size: 1.2em;
-            color: #333;
-        }
-        .button {
-            background-color: #1C3A57;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .button:hover {
-            background-color: #285480;
-        }
-        .notification {
-            font-size: 1.2em;
-            color: red;
+        #result {
             margin-top: 20px;
+            font-size: 1.2em;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>QR Kod Okuyucu</h1>
-        <div id="reader"></div>
-        <div class="result" id="result">QR kodu okutun...</div>
-        <button class="button" onclick="stopScanning()">Tarayıcıyı Durdur</button>
-        <div id="notification" class="notification"></div>
-    </div>
+    <video id="video" autoplay></video>
+    <div id="result">QR kodu taramak için kamerayı ekrana yönlendirin.</div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
     <script>
-        let html5QrCode;
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true); // iOS için gerekli
+                video.play();
+                scanQRCode();
+            } catch (err) {
+                console.error('Kamera açılırken bir hata oluştu: ', err);
+                document.getElementById('result').textContent = 'Kamera açılırken bir hata oluştu.';
+            }
+        }
 
-        function startScanning() {
-            html5QrCode = new Html5Qrcode("reader");
+        function scanQRCode() {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
-            html5QrCode.start(
-                { facingMode: "environment" }, // Arka kamera
-                {
-                    fps: 10, // Tarayıcı hızı
-                    qrbox: { width: 250, height: 250 } // QR kod kutusunun boyutu
-                },
-                (decodedText, decodedResult) => {
-                    // QR kod okunduğunda burası çalışır
-                    document.getElementById('result').innerText = `Okunan Veri: ${decodedText}`;
-                },
-                (errorMessage) => {
-                    // Hata mesajları
-                    console.log(`QR kod okunamadı: ${errorMessage}`);
+            function detectQRCode() {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: "dontInvert" });
+
+                    if (code) {
+                        document.getElementById('result').textContent = `QR Kodu İçeriği: ${code.data}`;
+                        video.srcObject.getTracks().forEach(track => track.stop()); // Kamerayı durdur
+                    } else {
+                        requestAnimationFrame(detectQRCode);
+                    }
+                } else {
+                    requestAnimationFrame(detectQRCode);
                 }
-            ).catch((err) => {
-                // Tarayıcıyı başlatma hatası
-                console.error(`Tarayıcı başlatılamadı: ${err}`);
-                document.getElementById('notification').innerText = 'Kamera açılırken bir hata oluştu.';
-            });
+            }
+
+            detectQRCode();
         }
 
-        function stopScanning() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(ignore => {
-                    // Tarayıcı başarıyla durduruldu
-                    document.getElementById('result').innerText = 'Tarayıcı durduruldu';
-                }).catch(err => {
-                    // Tarayıcıyı durdurma hatası
-                    console.error(`Tarayıcı durdurulamadı: ${err}`);
-                });
-            }
-        }
-
-        window.onload = () => {
-            // Tarayıcı izinleri ve kamera açma işlemi
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                .then(() => {
-                    // Kamera izni verildi
-                    startScanning();
-                })
-                .catch((err) => {
-                    // Kamera izni verilmedi
-                    document.getElementById('notification').innerText = 'Kamera erişimi izni verilmedi. Lütfen tarayıcı izinlerini kontrol edin.';
-                });
-            } else {
-                document.getElementById('notification').innerText = 'Kamera erişimi desteklenmiyor.';
-            }
-        };
+        startCamera();
     </script>
 </body>
 </html>
