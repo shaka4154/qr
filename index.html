@@ -20,7 +20,7 @@
         }
         .header {
             position: absolute;
-            top: 235px; /* Logoyu aşağıya getirdik */
+            top: 235px; /* Logoyu yukarıya getirdik */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -198,11 +198,7 @@
         });
 
         newScanButton.addEventListener('click', () => {
-            result.style.display = 'none'; // Sonuç kutusunu gizle
-            newScanButton.style.display = 'none'; // Yeni tarama butonunu gizle
-            logoContainer.style.display = 'flex'; // Logoyu tekrar göster
-            startButton.style.display = 'block'; // Başla butonunu tekrar göster
-            video.style.display = 'none'; // Videoyu gizle
+            location.reload(); // Sayfayı yeniden yükle
         });
 
         function showResult(text) {
