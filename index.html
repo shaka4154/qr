@@ -70,6 +70,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-bottom: 20px;
         }
         .button:hover {
             background-color: #285480;
@@ -77,15 +78,25 @@
         video {
             border: 5px solid #1C3A57;
             border-radius: 10px;
-            width: 300px; /* Kamera ekranını küçültüyoruz */
-            height: auto;
+            width: 250px; /* Kamera ekranını küçültüyoruz */
+            height: 250px; /* Kare şeklinde */
             display: none;
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
         .result {
             margin-top: 20px;
-            font-size: 1.2em;
+            width: 250px; /* Sonuç kutusunu kare yapmak için */
+            height: 250px; /* Kare şeklinde */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border: 2px solid #1C3A57;
+            border-radius: 10px;
             color: #1C3A57;
+            font-size: 1em;
+            text-align: center;
+            overflow: hidden;
         }
         .result a {
             color: #007bff;
@@ -106,6 +117,15 @@
             }
             .header img {
                 width: 120px;
+            }
+            video {
+                width: 200px;
+                height: 200px;
+            }
+            .result {
+                width: 200px;
+                height: 200px;
+                font-size: 0.8em;
             }
         }
     </style>
