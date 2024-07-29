@@ -6,115 +6,141 @@
     <title>QR Kod Tarayıcı</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #00c6ff, #0072ff); /* Modern gradient arka plan */
+            font-family: 'Impact', sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
-            color: #fff;
+            overflow: hidden;
         }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        #video {
-            border: 2px solid #fff;
+        .header img {
+            width: 150px;
+            height: auto;
+            cursor: pointer;
+        }
+        .header .back-button {
+            font-size: 1.2em;
+            color: #1C3A57;
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .header .back-button:hover {
+            color: #007bff;
+        }
+        .title {
+            margin: 20px 0;
+            font-size: 2em;
+            color: #1C3A57;
+            text-transform: uppercase;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        #result {
+        .button {
+            background-color: #1C3A57;
+            color: white;
+            padding: 1em 2em;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #285480;
+        }
+        video {
+            border: 5px solid #1C3A57;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            margin-top: 20px;
+        }
+        .result {
             margin-top: 20px;
             font-size: 1.2em;
-            padding: 10px 20px;
-            border-radius: 5px;
-            background: rgba(0, 0, 0, 0.7);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            color: #1C3A57;
         }
-        #result a {
-            color: #00ffb3;
+        .result a {
+            color: #007bff;
             text-decoration: none;
         }
-        #result a:hover {
+        .result a:hover {
             text-decoration: underline;
-        }
-        .loading {
-            display: none;
-            font-size: 1.2em;
-            color: #fff;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>QR Kod Tarayıcı</h1>
-    <video id="video" width="300" height="300" autoplay></video>
-    <div id="result">QR kodunu tarayın...</div>
-    <div id="loading" class="loading">Kamera açılıyor, lütfen bekleyin...</div>
-    
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">Anamenüye Dön</button>
+        <a href="https://www.youtube.com/@GENCKALFA" target="_blank">
+            <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo">
+        </a>
+    </div>
+    <div class="title">QR Kod Tarayıcı</div>
+    <div class="container">
+        <button class="button" id="startButton">Hemen Tara</button>
+        <video id="video" autoplay></video>
+        <div class="result" id="result"></div>
+    </div>
+
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
-        const codeReader = new ZXing.BrowserQRCodeReader();
+        const startButton = document.getElementById('startButton');
         const video = document.getElementById('video');
-        const resultElement = document.getElementById('result');
-        const loadingElement = document.getElementById('loading');
+        const result = document.getElementById('result');
+        let selectedDeviceId;
 
-        async function startScanner() {
-            try {
-                loadingElement.style.display = 'block'; // Yükleniyor mesajını göster
-                const devices = await codeReader.listVideoInputDevices();
-                if (devices.length === 0) {
-                    resultElement.textContent = 'Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.';
-                    return;
-                }
+        const codeReader = new ZXing.BrowserQRCodeReader();
 
-                // Arka kamerayı seçme
-                const backCamera = devices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')) || devices[0];
-                const deviceId = backCamera.deviceId;
-
-                // QR kod tarayıcıyı başlat
-                codeReader.decodeFromVideoDevice(deviceId, video, (result, error) => {
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none'; // Butonu gizle
+            codeReader.listVideoInputDevices().then(devices => {
+                selectedDeviceId = devices[0].deviceId;
+                codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
                     if (result) {
-                        // QR kod okundu, kamerayı kapat ve sonucu göster
-                        displayResult(result.text);
-                        stopScanner();
-                    }
-                    if (error) {
+                        video.srcObject.getTracks().forEach(track => track.stop()); // Kamerayı kapat
+                        result.text ? showResult(result.text) : showError('QR kodu okunamadı.');
+                    } else if (error) {
                         console.error(error);
                     }
                 });
-            } catch (err) {
-                console.error(err);
-                resultElement.textContent = 'Bir hata oluştu. Lütfen tarayıcınızı ve kamera izinlerinizi kontrol edin.';
-            } finally {
-                loadingElement.style.display = 'none'; // Yükleniyor mesajını gizle
-            }
-        }
+            }).catch(err => console.error(err));
+        });
 
-        function stopScanner() {
-            // Video akışını durdur
-            const stream = video.srcObject;
-            if (stream) {
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                video.srcObject = null;
-            }
-        }
-
-        function displayResult(text) {
-            if (text.startsWith('http://') || text.startsWith('https://')) {
-                // Eğer QR kodu bir URL içeriyorsa, tıklanabilir link oluştur
-                resultElement.innerHTML = `<a href="${text}" target="_blank">${text}</a>`;
+        function showResult(text) {
+            if (text.startsWith('http')) {
+                result.innerHTML = `Kod içeriği: <a href="${text}" target="_blank">${text}</a>`;
             } else {
-                // QR kodu bir metin içeriyorsa, sadece metni göster
-                resultElement.textContent = text;
+                result.textContent = `Kod içeriği: ${text}`;
             }
         }
 
-        startScanner();
+        function showError(message) {
+            result.textContent = message;
+        }
     </script>
 </body>
 </html>
