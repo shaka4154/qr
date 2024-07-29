@@ -3,113 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Okuyucu</title>
+    <title>QR Kod Tarayıcı</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
             text-align: center;
-            overflow: hidden;
-        }
-        #container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
         }
         #video {
-            width: 100%;
-            border: 1px solid #ddd;
-            background: #000;
-        }
-        #overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 500px;
-            height: 80%;
-            max-height: 400px;
-            border: 2px solid #00ff00; /* Çerçeve rengi */
-            box-sizing: border-box;
-            pointer-events: none;
+            border: 1px solid black;
+            border-radius: 10px;
         }
         #result {
             margin-top: 20px;
             font-size: 1.2em;
-            color: #333;
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <video id="video" autoplay></video>
-        <div id="overlay"></div>
-    </div>
-    <div id="result">QR kodu taramak için kamerayı ekrana yönlendirin.</div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    <h1>QR Kod Tarayıcı</h1>
+    <video id="video" width="300" height="300" autoplay></video>
+    <div id="result">QR kodunu tarayın...</div>
+    
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
-        async function startCamera() {
+        const codeReader = new ZXing.BrowserQRCodeReader();
+        const video = document.getElementById('video');
+        const resultElement = document.getElementById('result');
+        
+        async function startScanner() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                video.setAttribute('playsinline', true); // iOS için gerekli
-                video.play();
-                video.onloadedmetadata = () => {
-                    scanQRCode();
-                };
-            } catch (err) {
-                console.error('Kamera açılırken bir hata oluştu: ', err);
-                document.getElementById('result').textContent = 'Kamera açılırken bir hata oluştu.';
-            }
-        }
-
-        function scanQRCode() {
-            const video = document.getElementById('video');
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-
-            function detectQRCode() {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    const overlay = document.getElementById('overlay');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
-                    // Çerçevenin içine yalnızca bu alandaki QR kodunu tarayın
-                    const overlayRect = overlay.getBoundingClientRect();
-                    const videoRect = video.getBoundingClientRect();
-                    const scaleX = canvas.width / videoRect.width;
-                    const scaleY = canvas.height / videoRect.height;
-                    const left = (overlayRect.left - videoRect.left) * scaleX;
-                    const top = (overlayRect.top - videoRect.top) * scaleY;
-                    const width = overlayRect.width * scaleX;
-                    const height = overlayRect.height * scaleY;
-
-                    const imageData = context.getImageData(left, top, width, height);
-                    const code = jsQR(imageData.data, width, height, { inversionAttempts: "dontInvert" });
-
-                    if (code) {
-                        document.getElementById('result').textContent = `QR Kodu İçeriği: ${code.data}`;
-                        video.srcObject.getTracks().forEach(track => track.stop()); // Kamerayı durdur
-                    } else {
-                        requestAnimationFrame(detectQRCode);
-                    }
-                } else {
-                    requestAnimationFrame(detectQRCode);
+                const devices = await codeReader.listVideoInputDevices();
+                if (devices.length === 0) {
+                    resultElement.textContent = 'Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.';
+                    return;
                 }
+                const firstDeviceId = devices[0].deviceId;
+                await codeReader.decodeFromVideoDevice(firstDeviceId, video, (result, error) => {
+                    if (result) {
+                        resultElement.textContent = `QR Kodu İçeriği: ${result.text}`;
+                    }
+                    if (error) {
+                        console.error(error);
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                resultElement.textContent = 'Bir hata oluştu. Lütfen tarayıcınızı ve kamera izinlerinizi kontrol edin.';
             }
-
-            detectQRCode();
         }
 
-        startCamera();
+        startScanner();
     </script>
 </body>
 </html>
