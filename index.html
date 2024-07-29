@@ -56,6 +56,7 @@
             background: rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
         }
         .button {
             background-color: #1C3A57;
@@ -77,6 +78,7 @@
             max-width: 400px;
             height: auto;
             margin-top: 20px;
+            display: none;
         }
         .result {
             margin-top: 20px;
@@ -89,6 +91,20 @@
         }
         .result a:hover {
             text-decoration: underline;
+        }
+
+        /* Mobil uyumlu stil */
+        @media (max-width: 600px) {
+            .title {
+                font-size: 1.5em;
+            }
+            .button {
+                font-size: 1em;
+                padding: 0.8em 1.5em;
+            }
+            .header img {
+                width: 120px;
+            }
         }
     </style>
 </head>
@@ -118,11 +134,16 @@
         startButton.addEventListener('click', () => {
             startButton.style.display = 'none'; // Butonu gizle
             codeReader.listVideoInputDevices().then(devices => {
-                selectedDeviceId = devices[0].deviceId;
+                // Arka kamerayı seç
+                const rearCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
+                selectedDeviceId = rearCamera.deviceId;
+                
+                video.style.display = 'block'; // Videoyu göster
+                
                 codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
                     if (result) {
                         video.srcObject.getTracks().forEach(track => track.stop()); // Kamerayı kapat
-                        result.text ? showResult(result.text) : showError('QR kodu okunamadı.');
+                        showResult(result.text);
                     } else if (error) {
                         console.error(error);
                     }
@@ -136,10 +157,6 @@
             } else {
                 result.textContent = `Kod içeriği: ${text}`;
             }
-        }
-
-        function showError(message) {
-            result.textContent = message;
         }
     </script>
 </body>
