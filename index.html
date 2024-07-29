@@ -6,22 +6,46 @@
     <title>QR Kod Tarayıcı</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff); /* Modern gradient arka plan */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            text-align: center;
+            color: #fff;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
         }
         #video {
-            border: 1px solid black;
+            border: 2px solid #fff;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
         #result {
             margin-top: 20px;
             font-size: 1.2em;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        #result a {
+            color: #00ffb3;
+            text-decoration: none;
+        }
+        #result a:hover {
+            text-decoration: underline;
+        }
+        .loading {
+            display: none;
+            font-size: 1.2em;
+            color: #fff;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -29,15 +53,18 @@
     <h1>QR Kod Tarayıcı</h1>
     <video id="video" width="300" height="300" autoplay></video>
     <div id="result">QR kodunu tarayın...</div>
+    <div id="loading" class="loading">Kamera açılıyor, lütfen bekleyin...</div>
     
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
         const codeReader = new ZXing.BrowserQRCodeReader();
         const video = document.getElementById('video');
         const resultElement = document.getElementById('result');
+        const loadingElement = document.getElementById('loading');
 
         async function startScanner() {
             try {
+                loadingElement.style.display = 'block'; // Yükleniyor mesajını göster
                 const devices = await codeReader.listVideoInputDevices();
                 if (devices.length === 0) {
                     resultElement.textContent = 'Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.';
@@ -52,7 +79,7 @@
                 codeReader.decodeFromVideoDevice(deviceId, video, (result, error) => {
                     if (result) {
                         // QR kod okundu, kamerayı kapat ve sonucu göster
-                        resultElement.textContent = `QR Kodu İçeriği: ${result.text}`;
+                        displayResult(result.text);
                         stopScanner();
                     }
                     if (error) {
@@ -62,6 +89,8 @@
             } catch (err) {
                 console.error(err);
                 resultElement.textContent = 'Bir hata oluştu. Lütfen tarayıcınızı ve kamera izinlerinizi kontrol edin.';
+            } finally {
+                loadingElement.style.display = 'none'; // Yükleniyor mesajını gizle
             }
         }
 
@@ -72,6 +101,16 @@
                 const tracks = stream.getTracks();
                 tracks.forEach(track => track.stop());
                 video.srcObject = null;
+            }
+        }
+
+        function displayResult(text) {
+            if (text.startsWith('http://') || text.startsWith('https://')) {
+                // Eğer QR kodu bir URL içeriyorsa, tıklanabilir link oluştur
+                resultElement.innerHTML = `<a href="${text}" target="_blank">${text}</a>`;
+            } else {
+                // QR kodu bir metin içeriyorsa, sadece metni göster
+                resultElement.textContent = text;
             }
         }
 
