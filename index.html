@@ -3,209 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Tarayıcı</title>
+    <title>IPTV Player</title>
     <style>
         body {
-            font-family: 'Impact', sans-serif;
-            background-color: white;
-            margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            overflow: hidden;
-            text-align: center;
-        }
-        .header {
-            position: absolute;
-            top: 235px; /* Logoyu yukarıya getirdik */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .header img {
-            width: 150px;
-            height: auto;
-            cursor: pointer;
-        }
-        .title {
-            margin: 100px 0 20px 0; /* Başlık ile logo arasındaki mesafeyi arttırır */
-            font-size: 2em;
-            color: #1C3A57;
-            text-transform: uppercase;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            max-width: 100%;
-            width: 90%;
-        }
-        .button {
-            background-color: #1C3A57;
-            color: white;
-            padding: 1em 2em;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-bottom: 20px;
-        }
-        .button:hover {
-            background-color: #285480;
+            margin: 0;
         }
         video {
-            border: 5px solid #1C3A57;
-            border-radius: 10px;
-            width: 100%;
+            width: 80%;
+            max-width: 800px;
             height: auto;
-            max-width: 500px;
-            display: none;
-            margin-bottom: 20px;
+            background-color: #000;
         }
-        .result {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 500px;
-            background: #f0f0f0;
-            border: 2px solid #1C3A57;
-            border-radius: 10px;
-            color: #1C3A57;
-            font-size: 1em;
-            text-align: center;
-            overflow: hidden;
+        input, select, button {
+            width: 80%;
+            max-width: 800px;
             padding: 10px;
-            box-sizing: border-box;
+            margin: 10px 0;
+            font-size: 16px;
         }
-        .result a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .result a:hover {
-            text-decoration: underline;
-        }
-        .back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: transparent;
-            border: none;
-            font-size: 1.2em;
-            color: #1C3A57;
-            cursor: pointer;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .back-button:hover {
-            color: #007bff;
-        }
-        .new-scan-button {
-            display: none;
+        button {
             background-color: #1C3A57;
-            color: white;
-            padding: 1em 2em;
-            font-size: 1.2em;
+            color: #fff;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 20px;
+            border-radius: 5px;
         }
-        .new-scan-button:hover {
+        button:hover {
             background-color: #285480;
         }
-        @media (max-width: 600px) {
-            .title {
-                font-size: 1.5em;
-            }
-            .button {
-                font-size: 1em;
-                padding: 0.8em 1.5em;
-            }
-            .header img {
-                width: 120px;
-            }
-            video {
-                width: 90%;
-                max-width: none;
-            }
-            .result {
-                width: 90%;
-                font-size: 0.9em;
-            }
+        .content-section {
+            width: 80%;
+            max-width: 800px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-button">Anamenüye Dön</a>
-    <div class="header" id="logoContainer">
-        <a href="https://www.youtube.com/@GENCKALFA" target="_blank">
-            <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo">
-        </a>
+    <h1>IPTV Player</h1>
+    <input type="text" id="m3uUrl" placeholder="M3U Dosyası URL'sini Girin">
+    <button onclick="loadChannels()">Kanalları Yükle</button>
+    
+    <div class="content-section">
+        <h2>Kanallar ve Diziler</h2>
+        <select id="channelSelect">
+            <option value="">Kanal veya Dizi Seçin</option>
+        </select>
     </div>
-    <div class="title">QR Kod Tarayıcı</div>
-    <div class="container">
-        <button class="button" id="startButton">Hemen Tara</button>
-        <video id="video" autoplay></video>
-        <div class="result" id="result"></div>
-        <button class="new-scan-button" id="newScanButton">Yeni Tarama Yap</button>
-    </div>
+    
+    <button onclick="loadStream()">Yükle</button>
+    <video id="iptvPlayer" controls></video>
 
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        const startButton = document.getElementById('startButton');
-        const video = document.getElementById('video');
-        const result = document.getElementById('result');
-        const newScanButton = document.getElementById('newScanButton');
-        const logoContainer = document.getElementById('logoContainer');
-        const backButton = document.querySelector('.back-button');
-        let selectedDeviceId;
+        async function loadChannels() {
+            const url = document.getElementById('m3uUrl').value;
+            const response = await fetch(url);
+            const m3uText = await response.text();
+            
+            const channelSelect = document.getElementById('channelSelect');
+            const items = parseM3U(m3uText);
 
-        const codeReader = new ZXing.BrowserQRCodeReader();
+            channelSelect.innerHTML = '<option value="">Kanal veya Dizi Seçin</option>';
+            
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.url;
+                option.textContent = item.name;
+                channelSelect.appendChild(option);
+            });
+        }
 
-        startButton.addEventListener('click', () => {
-            startButton.style.display = 'none'; // Butonu gizle
-            logoContainer.style.display = 'none'; // Logoyu gizle
-            backButton.style.display = 'none'; // 'Anamenüye Dön' butonunu gizle
-            codeReader.listVideoInputDevices().then(devices => {
-                const rearCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
-                selectedDeviceId = rearCamera.deviceId;
-                
-                video.style.display = 'block'; // Videoyu göster
-                
-                codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
-                    if (result) {
-                        video.style.display = 'none'; // Kamerayı gizle
-                        result.style.display = 'block'; // Sonuç kutusunu göster
-                        newScanButton.style.display = 'block'; // Yeni tarama butonunu göster
-                        showResult(result.text);
-                    } else if (error) {
-                        console.error(error);
-                    }
+        function parseM3U(m3uText) {
+            const lines = m3uText.split('\n');
+            const items = [];
+            let item = {};
+            
+            lines.forEach(line => {
+                if (line.startsWith('#EXTINF')) {
+                    const name = line.split(',')[1];
+                    item.name = name.trim();
+                } else if (line.startsWith('http')) {
+                    item.url = line.trim();
+                    items.push(item);
+                    item = {};
+                }
+            });
+
+            return items;
+        }
+
+        function loadStream() {
+            const url = document.getElementById('channelSelect').value;
+            const player = document.getElementById('iptvPlayer');
+            
+            if (!url) {
+                alert('Lütfen bir kanal veya dizi seçin!');
+                return;
+            }
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(player);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    player.play();
                 });
-            }).catch(err => console.error(err));
-        });
-
-        newScanButton.addEventListener('click', () => {
-            location.reload(); // Sayfayı yeniden yükle
-        });
-
-        function showResult(text) {
-            if (text.startsWith('http')) {
-                result.innerHTML = `Kod içeriği: <a href="${text}" target="_blank">${text}</a>`;
+            } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                player.src = url;
+                player.addEventListener('loadedmetadata', function() {
+                    player.play();
+                });
             } else {
-                result.textContent = `Kod içeriği: ${text}`;
+                alert('Tarayıcınız bu yayını desteklemiyor!');
             }
         }
     </script>
