@@ -30,10 +30,15 @@
         // JSON dosyasını yükle
         fetch('renault_codes.json')
             .then(response => response.json())
-            .then(data => codes = data);
+            .then(data => {
+                codes = data;
+                console.log('JSON yüklendi:', codes); // JSON verisini konsola yazdır
+            })
+            .catch(error => console.error('JSON yükleme hatası:', error));
 
         function findCode() {
             const precode = document.getElementById('precode').value.toUpperCase();
+            console.log('Girilen precode:', precode); // Precode değerini konsola yazdır
             const code = codes[precode];
 
             if (code) {
