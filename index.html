@@ -3,126 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPTV Player</title>
+    <title>Renault Radyo Kodu Bulma</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 50px;
         }
-        video {
-            width: 80%;
-            max-width: 800px;
-            height: auto;
-            background-color: #000;
-        }
-        input, select, button {
-            width: 80%;
-            max-width: 800px;
+        input, button {
             padding: 10px;
-            margin: 10px 0;
             font-size: 16px;
-        }
-        button {
-            background-color: #1C3A57;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #285480;
-        }
-        .content-section {
-            width: 80%;
-            max-width: 800px;
-            margin: 10px 0;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>IPTV Player</h1>
-    <input type="text" id="m3uUrl" placeholder="M3U Dosyası URL'sini Girin">
-    <button onclick="loadChannels()">Kanalları Yükle</button>
-    
-    <div class="content-section">
-        <h2>Kanallar ve Diziler</h2>
-        <select id="channelSelect">
-            <option value="">Kanal veya Dizi Seçin</option>
-        </select>
-    </div>
-    
-    <button onclick="loadStream()">Yükle</button>
-    <video id="iptvPlayer" controls></video>
+    <h1>Renault Radyo Kodu Bulma</h1>
+    <input type="text" id="precode" placeholder="Precode girin">
+    <button onclick="findCode()">Kodu Bul</button>
+    <p id="result"></p>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        async function loadChannels() {
-            const url = document.getElementById('m3uUrl').value;
-            const response = await fetch(url);
-            const m3uText = await response.text();
-            
-            const channelSelect = document.getElementById('channelSelect');
-            const items = parseM3U(m3uText);
+        let codes;
 
-            channelSelect.innerHTML = '<option value="">Kanal veya Dizi Seçin</option>';
-            
-            items.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.url;
-                option.textContent = item.name;
-                channelSelect.appendChild(option);
-            });
-        }
+        // JSON dosyasını yükle
+        fetch('renault_codes.json')
+            .then(response => response.json())
+            .then(data => codes = data);
 
-        function parseM3U(m3uText) {
-            const lines = m3uText.split('\n');
-            const items = [];
-            let item = {};
-            
-            lines.forEach(line => {
-                if (line.startsWith('#EXTINF')) {
-                    const name = line.split(',')[1];
-                    item.name = name.trim();
-                } else if (line.startsWith('http')) {
-                    item.url = line.trim();
-                    items.push(item);
-                    item = {};
-                }
-            });
+        function findCode() {
+            const precode = document.getElementById('precode').value.toUpperCase();
+            const code = codes[precode];
 
-            return items;
-        }
-
-        function loadStream() {
-            const url = document.getElementById('channelSelect').value;
-            const player = document.getElementById('iptvPlayer');
-            
-            if (!url) {
-                alert('Lütfen bir kanal veya dizi seçin!');
-                return;
-            }
-            
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(player);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    player.play();
-                });
-            } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
-                player.src = url;
-                player.addEventListener('loadedmetadata', function() {
-                    player.play();
-                });
+            if (code) {
+                document.getElementById('result').textContent = `Radyo kodu: ${code}`;
             } else {
-                alert('Tarayıcınız bu yayını desteklemiyor!');
+                document.getElementById('result').textContent = 'Kod bulunamadı';
             }
         }
     </script>
