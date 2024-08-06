@@ -3,48 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renault Radyo Kodu Bulma</title>
+    <title>İnternet Hız Testi</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: Impact, sans-serif;
             text-align: center;
-            padding: 50px;
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
         }
-        input, button {
-            padding: 10px;
+        h1 {
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
             font-size: 16px;
-            margin: 5px;
+            cursor: pointer;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: #333;
+            color: #fff;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        #loading {
+            display: none;
+            font-size: 16px;
+            color: #fff;
         }
     </style>
 </head>
 <body>
-    <h1>Renault Radyo Kodu Bulma</h1>
-    <input type="text" id="precode" placeholder="Precode girin">
-    <button onclick="findCode()">Kodu Bul</button>
-    <p id="result"></p>
+    <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo" class="logo">
+    <h1>İnternet Hız Testi</h1>
+    <p>Aşağıdaki butona tıklayarak internet hızınızı test edin.</p>
+    <button onclick="startSpeedTest()">Teste Başla</button>
+    <div id="loading">Test yapılıyor, lütfen bekleyin...</div>
+    <div id="result"></div>
 
     <script>
-        let codes;
+        async function startSpeedTest() {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.textContent = '';
+            loadingDiv.style.display = 'block';
 
-        // JSON dosyasını yükle
-        fetch('renault_codes.json')
-            .then(response => response.json())
-            .then(data => {
-                codes = data;
-                console.log('JSON yüklendi:', codes); // JSON verisini konsola yazdır
-            })
-            .catch(error => console.error('JSON yükleme hatası:', error));
+            try {
+                // Download Test
+                const downloadStartTime = new Date().getTime();
+                const downloadResponse = await fetch('https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg?' + Math.random());
+                const downloadEndTime = new Date().getTime();
+                const downloadDuration = (downloadEndTime - downloadStartTime) / 1000;
+                const downloadFileSize = downloadResponse.headers.get('content-length') * 8;
+                const downloadSpeedBps = downloadFileSize / downloadDuration;
+                const downloadSpeedMbps = (downloadSpeedBps / 1024 / 1024).toFixed(2);
 
-        function findCode() {
-            const precode = document.getElementById('precode').value.toUpperCase();
-            console.log('Girilen precode:', precode); // Precode değerini konsola yazdır
-            const code = codes[precode];
+                // Upload Test
+                const uploadData = new Uint8Array(20 * 1024 * 1024);
+                const uploadStartTime = new Date().getTime();
+                await fetch('https://www.google.com', {
+                    method: 'POST',
+                    body: uploadData,
+                    headers: {
+                        'Content-Type': 'application/octet-stream'
+                    }
+                });
+                const uploadEndTime = new Date().getTime();
+                const uploadDuration = (uploadEndTime - uploadStartTime) / 1000;
+                const uploadFileSize = uploadData.byteLength * 8;
+                const uploadSpeedBps = uploadFileSize / uploadDuration;
+                const uploadSpeedMbps = (uploadSpeedBps / 1024 / 1024).toFixed(2);
 
-            if (code) {
-                document.getElementById('result').textContent = `Radyo kodu: ${code}`;
-            } else {
-                document.getElementById('result').textContent = 'Kod bulunamadı';
+                loadingDiv.style.display = 'none';
+                resultDiv.innerHTML = `
+                    İndirme hızı: ${downloadSpeedMbps} Mbps<br>
+                    Yükleme hızı: ${uploadSpeedMbps} Mbps
+                `;
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.textContent = 'Test sırasında bir hata oluştu.';
             }
         }
     </script>
