@@ -1,100 +1,53 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İnternet Hız Testi</title>
-    <style>
-        body {
-            font-family: Impact, sans-serif;
-            text-align: center;
-            background-color: #000;
-            color: #fff;
-            padding: 20px;
-        }
-        h1 {
-            color: #fff;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #fff;
-            color: #000;
-            border: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        button:hover {
-            background-color: #333;
-            color: #fff;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        .logo {
-            width: 100px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-        #loading {
-            display: none;
-            font-size: 16px;
-            color: #fff;
-        }
-    </style>
-</head>
-<body>
-    <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo" class="logo">
-    <h1>İnternet Hız Testi</h1>
-    <p>Aşağıdaki butona tıklayarak internet hızınızı test edin.</p>
-    <button onclick="startSpeedTest()">Teste Başla</button>
-    <div id="loading">Test yapılıyor, lütfen bekleyin...</div>
-    <div id="result"></div>
-
+    <title>Renault Radyo Kod Bulucu</title>
     <script>
-        async function startSpeedTest() {
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            resultDiv.textContent = '';
-            loadingDiv.style.display = 'block';
+        // Boş bir nesne oluşturuyoruz
+        const codes = {};
 
+        // Veriyi dosyadan okuyup nesneye aktarıyoruz
+        async function loadCodes() {
             try {
-                // Download Test
-                const downloadStartTime = new Date().getTime();
-                const downloadResponse = await fetch('https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg?' + Math.random());
-                const downloadEndTime = new Date().getTime();
-                const downloadDuration = (downloadEndTime - downloadStartTime) / 1000;
-                const downloadFileSize = downloadResponse.headers.get('content-length') * 8;
-                const downloadSpeedBps = downloadFileSize / downloadDuration;
-                const downloadSpeedMbps = (downloadSpeedBps / 1024 / 1024).toFixed(2);
+                const response = await fetch('assets/codes.txt'); // Dosyanızın yolunu buraya ekleyin
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const data = await response.text();
+                const lines = data.trim().split('\n');
 
-                // Upload Test
-                const uploadData = new Uint8Array(20 * 1024 * 1024);
-                const uploadStartTime = new Date().getTime();
-                await fetch('https://www.google.com', {
-                    method: 'POST',
-                    body: uploadData,
-                    headers: {
-                        'Content-Type': 'application/octet-stream'
+                lines.forEach(line => {
+                    const [precode, code] = line.split(',');
+                    if (precode && code) {
+                        codes[precode.trim()] = code.trim();
                     }
                 });
-                const uploadEndTime = new Date().getTime();
-                const uploadDuration = (uploadEndTime - uploadStartTime) / 1000;
-                const uploadFileSize = uploadData.byteLength * 8;
-                const uploadSpeedBps = uploadFileSize / uploadDuration;
-                const uploadSpeedMbps = (uploadSpeedBps / 1024 / 1024).toFixed(2);
-
-                loadingDiv.style.display = 'none';
-                resultDiv.innerHTML = `
-                    İndirme hızı: ${downloadSpeedMbps} Mbps<br>
-                    Yükleme hızı: ${uploadSpeedMbps} Mbps
-                `;
             } catch (error) {
-                loadingDiv.style.display = 'none';
-                resultDiv.textContent = 'Test sırasında bir hata oluştu.';
+                console.error('Veri yüklenirken bir hata oluştu:', error);
+            }
+        }
+
+        // Sayfa yüklendiğinde kodları yüklüyoruz
+        window.onload = loadCodes;
+
+        function findCode() {
+            const precode = document.getElementById("precode").value.toUpperCase();
+            const code = codes[precode];
+            const result = document.getElementById("result");
+
+            if (code) {
+                result.textContent = `Kod: ${code}`;
+            } else {
+                result.textContent = "Precode bulunamadı.";
             }
         }
     </script>
+</head>
+<body>
+    <h1>Renault Radyo Kod Bulucu</h1>
+    <label for="precode">Precode giriniz:</label>
+    <input type="text" id="precode">
+    <button onclick="findCode()">Bul</button>
+    <p id="result"></p>
 </body>
 </html>
