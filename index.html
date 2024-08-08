@@ -1,9 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Renault Radyo Kod Bulucu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .header {
+            background-color: #002d72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 4px solid #004d99;
+            position: relative;
+        }
+
+        .header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            transition: transform 0.3s;
+        }
+
+        .header img:hover {
+            transform: scale(1.1);
+        }
+
+        .header .title {
+            font-size: 3em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sub-header {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #002d72;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5em;
+            border: 2px solid #002d72;
+            border-radius: 5px;
+            background-color: white;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #004d99;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #003c8f;
+            transform: scale(1.05);
+        }
+
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+            font-weight: 700;
+        }
+
+        .menu-return {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            font-size: 1em;
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s;
+        }
+
+        .menu-return:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            background-color: #002d72;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-top: 4px solid #004d99;
+            position: relative;
+        }
+
+        footer a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header .title {
+                font-size: 2.5em;
+            }
+            .sub-header {
+                font-size: 1.5em;
+            }
+            button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+            input[type="text"] {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="menu-return" href="index.html">Anamenüye Dön</a>
+
+    <div class="header">
+        <a href="https://www.youtube.com/@GENCKALFA?sub_confirmation=1" target="_blank">
+            <img src="https://i.hizliresim.com/98issid.png" alt="Genç Kalfa Logo">
+        </a>
+        <div class="title">Genç Kalfa</div>
+    </div>
+
+    <div class="container">
+        <div class="sub-header">Renault Radyo Kod Bulucu</div>
+        <label for="precode">Precode giriniz:</label>
+        <div class="input-group">
+            <input type="text" id="precode1" maxlength="1" oninput="moveToNext(this, 'precode2')">
+            <input type="text" id="precode2" maxlength="1" oninput="moveToNext(this, 'precode3')">
+            <input type="text" id="precode3" maxlength="1" oninput="moveToNext(this, 'precode4')">
+            <input type="text" id="precode4" maxlength="1" oninput="moveToNext(this, '')">
+        </div>
+        <button onclick="findCode()">Bul</button>
+        <div id="result"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Genç Kalfa. Tüm hakları saklıdır.</p>
+        <p><a href="https://www.youtube.com/@GENCKALFA" target="_blank">YouTube Kanalımıza Abone Olun</a></p>
+    </footer>
+
     <script>
         // Boş bir nesne oluşturuyoruz
         const codes = {};
@@ -31,7 +218,12 @@
         window.onload = loadCodes;
 
         function findCode() {
-            const precode = document.getElementById("precode").value.toUpperCase();
+            const precode = [
+                document.getElementById("precode1").value.toUpperCase(),
+                document.getElementById("precode2").value.toUpperCase(),
+                document.getElementById("precode3").value.toUpperCase(),
+                document.getElementById("precode4").value.toUpperCase()
+            ].join('');
             const code = codes[precode];
             const result = document.getElementById("result");
 
@@ -41,13 +233,12 @@
                 result.textContent = "Precode bulunamadı.";
             }
         }
+
+        function moveToNext(current, nextId) {
+            if (current.value.length === 1 && nextId) {
+                document.getElementById(nextId).focus();
+            }
+        }
     </script>
-</head>
-<body>
-    <h1>Renault Radyo Kod Bulucu</h1>
-    <label for="precode">Precode giriniz:</label>
-    <input type="text" id="precode">
-    <button onclick="findCode()">Bul</button>
-    <p id="result"></p>
 </body>
 </html>
