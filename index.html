@@ -35,7 +35,8 @@
             map[shortCode] = plainText; // Kodu orijinal metinle eşleştir
             
             // QR kodu oluşturma
-            const qrCode = new QRCode(document.getElementById("qrCodeImage"), {
+            document.getElementById("qrCodeImage").innerHTML = ""; // Önceki QR kodunu temizle
+            new QRCode(document.getElementById("qrCodeImage"), {
                 text: shortCode,
                 width: 256,
                 height: 256,
@@ -56,6 +57,23 @@
                 document.getElementById("result").innerText = "Geçersiz kod!";
             }
         }
+
+        // URL parametrelerinden kısa kodu al ve çöz
+        function handleURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (code) {
+                const decryptedText = map[decodeURIComponent(code)];
+                if (decryptedText) {
+                    document.getElementById("result").innerText = "Çözülmüş Metin: " + decryptedText;
+                } else {
+                    document.getElementById("result").innerText = "Geçersiz kod!";
+                }
+            }
+        }
+
+        // Sayfa yüklendiğinde URL parametrelerini kontrol et
+        window.onload = handleURLParameters;
     </script>
 
 </body>
