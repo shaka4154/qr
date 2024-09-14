@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch Benzeri Arayüz ve Yapay Zeka</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://unpkg.com/scratch-blocks/dist/scratch_blocks.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Scratch Benzeri Arayüz ve Yapay Zeka</h1>
+    <div id="blocklyDiv"></div>
+    <button onclick="exportCode()">Kodu Dışa Aktar</button>
+    <a id="downloadLink" style="display:none">Download</a>
+
+    <h2>Yapay Zeka Testi</h2>
+    <input type="file" id="upload" />
+    <img id="image" width="300" style="display:none" />
+    <p id="prediction"></p>
+</body>
+</html>
