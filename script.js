@@ -3,11 +3,17 @@ function initBlockly() {
     Blockly.inject('blocklyDiv', {
         toolbox: `
             <xml xmlns="http://www.w3.org/1999/xhtml">
+                <!-- Basit bloklar -->
+                <block type="motion_move"></block>
+                <block type="motion_turn"></block>
+                <block type="looks_say"></block>
+                <block type="sound_play"></block>
+                <!-- Gelişmiş bloklar -->
                 <block type="controls_if"></block>
                 <block type="controls_repeat_ext"></block>
                 <block type="logic_compare"></block>
                 <block type="math_number"></block>
-                <!-- Diğer Scratch blokları buraya eklenebilir -->
+                <!-- Diğer bloklar -->
             </xml>`,
         trashcan: true
     });
@@ -36,10 +42,12 @@ function initPhaser() {
 
     function preload() {
         this.load.image('sprite', 'path/to/sprite.png');
+        this.load.audio('sound', 'path/to/sound.mp3');
     }
 
     function create() {
         this.add.sprite(100, 100, 'sprite');
+        this.sound.add('sound');
     }
 
     function update() {
