@@ -4,8 +4,8 @@ body {
 }
 
 #blocklyDiv {
-    height: 400px;
-    width: 600px;
+    height: 600px;
+    width: 100%;
     margin: 0 auto;
     border: 1px solid #ccc;
 }
@@ -18,7 +18,7 @@ button {
 pre {
     text-align: left;
     margin: 0 auto;
-    width: 600px;
+    width: 100%;
     background-color: #f4f4f4;
     padding: 10px;
     border: 1px solid #ccc;
