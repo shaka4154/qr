@@ -1,3 +1,4 @@
+
 // Blockly yapılandırması
 function initBlockly() {
     Blockly.inject('blocklyDiv', {
